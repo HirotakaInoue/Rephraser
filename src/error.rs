@@ -13,6 +13,18 @@ pub enum RephraserError {
     #[error("LLM API error: {0}")]
     LlmApi(String),
 
+    #[error("Authentication failed: {0}")]
+    LlmAuth(String),
+
+    #[error("Rate limit exceeded: {0}")]
+    LlmRateLimit(String),
+
+    #[error("Invalid request: {0}")]
+    LlmBadRequest(String),
+
+    #[error("LLM service error: {0}")]
+    LlmServiceError(String),
+
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
 
