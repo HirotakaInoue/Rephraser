@@ -1,66 +1,99 @@
 # Rephraser
 
-macOS text transformation tool with LLM integration. Transform selected text using customizable actions through the right-click context menu.
+Transform text anywhere on macOS using AI-powered actions through the right-click context menu.
 
 ## Features
 
-- 🔄 Transform text using LLM (OpenAI GPT, Anthropic Claude)
-- 🖱️ macOS right-click menu integration via Services
-- ⚙️ Customizable actions (丁寧に, 整理する, 要約, etc.)
-- 🎯 Multiple output methods (clipboard, notification, dialog)
-- 🦀 Written in Rust for performance and reliability
+- 🔄 **AI-Powered Text Transformation** - Leverage OpenAI GPT or Anthropic Claude models
+- 🖱️ **Right-Click Integration** - Access transformations directly from macOS context menu
+- ⚙️ **Customizable Actions** - Define your own transformation prompts (polite, organize, summarize, translate, etc.)
+- 🎯 **Multiple Output Methods** - Choose clipboard, notification, or dialog output
+- 🦀 **Fast & Reliable** - Written in Rust for optimal performance
 
-## Project Status
+## Installation
 
-**Current Phase: Mock Implementation**
+### Prerequisites
 
-This is the initial architecture phase. The project structure and interfaces are complete, with mock implementations for testing the design.
+- macOS (tested on Catalina and later)
+- Rust toolchain (install from [rustup.rs](https://rustup.rs))
+- OpenAI API key or Anthropic API key
 
-### Completed ✅
-
-- [x] Project structure and architecture design
-- [x] CLI framework with clap
-- [x] Configuration management (TOML)
-- [x] Action template system
-- [x] LLM Client trait and Mock implementation
-- [x] Output handler framework
-- [x] Documentation
-
-### In Progress 🚧
-
-- [ ] OpenAI API client implementation
-- [ ] Anthropic API client implementation
-- [ ] macOS Services integration (Automator)
-- [ ] Output methods (actual clipboard/notification/dialog)
-
-## Quick Start
-
-### Build and Test
+### Install
 
 ```bash
-# Build the project
-cargo build
+# Clone the repository
+git clone https://github.com/yourusername/rephraser.git
+cd rephraser
 
-# Initialize configuration
-cargo run -- config init
+# Install the binary
+cargo install --path .
 
-# List available actions
-cargo run -- list-actions
-
-# Test with mock LLM (requires config provider = "mock")
-cargo run -- rephrase polite "こんにちは"
+# Verify installation
+rephraser --version
 ```
 
-### Configuration
+### Set up API key
 
-Configuration file is located at `~/.rephraser/config.toml`.
+Add your API key to your shell profile:
 
-Example configuration:
+```bash
+# For OpenAI
+echo 'export OPENAI_API_KEY="sk-your-api-key"' >> ~/.zshrc
+source ~/.zshrc
+
+# For Anthropic
+echo 'export ANTHROPIC_API_KEY="sk-ant-your-api-key"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Initialize configuration
+
+```bash
+rephraser config init
+```
+
+This creates `~/.rephraser/config.toml` with default settings.
+
+## Usage
+
+### Command Line
+
+Transform text directly from the terminal:
+
+```bash
+rephraser rephrase polite "こんにちは"
+# Output: こんにちは、お世話になっております。
+```
+
+List available actions:
+
+```bash
+rephraser list-actions
+```
+
+### macOS Quick Actions (Right-Click Menu)
+
+Set up Quick Actions to transform text from anywhere on macOS:
+
+1. Follow the setup guide in [`automator/README.md`](automator/README.md)
+2. Select text in any application
+3. Right-click → Services → "Rephraser - 丁寧に"
+4. Result appears instantly
+
+**Example workflow:**
+- Writing an email → select informal text → right-click → "Rephraser - 丁寧に" → polite version copied to clipboard
+- Reading a document → select long paragraph → right-click → "Rephraser - 要約" → concise summary in notification
+
+## Configuration
+
+Configuration file: `~/.rephraser/config.toml`
+
+### Basic Configuration
 
 ```toml
 [llm]
-provider = "mock"  # "openai", "anthropic", or "mock"
-model = "gpt-4o-mini"
+provider = "openai"          # or "anthropic"
+model = "gpt-4o-mini"        # or "claude-3-5-sonnet-20241022"
 api_key_env = "OPENAI_API_KEY"
 
 [llm.parameters]
@@ -68,101 +101,10 @@ temperature = 0.7
 max_tokens = 500
 
 [output]
-method = "notification"  # "clipboard", "notification", or "dialog"
-
-[[actions]]
-name = "polite"
-display_name = "丁寧に"
-prompt_template = """
-以下のテキストを丁寧な表現に変換してください。
-
-テキスト:
-{text}
-
-丁寧な表現:
-"""
+method = "clipboard"         # or "notification", "dialog"
 ```
 
-## Architecture
-
-See [docs/architecture.md](docs/architecture.md) for detailed architecture documentation.
-
-### System Overview
-
-```
-User (Right-click) → Automator Quick Action
-                         ↓
-                    Rust CLI (rephraser)
-                         ↓
-                  [Config] [Actions] [LLM Client]
-                         ↓
-                    Output Handler
-```
-
-### Core Components
-
-- **CLI**: Command-line interface (clap)
-- **Config Manager**: TOML configuration management
-- **Action Resolver**: Template-based prompt generation
-- **LLM Client**: Trait-based abstraction for multiple providers
-  - Mock (for testing)
-  - OpenAI (TODO)
-  - Anthropic (TODO)
-- **Output Handler**: Multiple output methods
-
-## CLI Commands
-
-```bash
-# Transform text
-rephraser rephrase <action> <text>
-
-# Configuration
-rephraser config init          # Initialize config file
-rephraser config show          # Show current config
-rephraser config set <k> <v>   # Set config value (TODO)
-rephraser config path          # Show config file path
-
-# List actions
-rephraser list-actions
-```
-
-## Development
-
-### Project Structure
-
-```
-Rephraser/
-├── src/
-│   ├── main.rs           # Entry point
-│   ├── lib.rs            # Library root
-│   ├── cli/              # CLI commands
-│   ├── config/           # Configuration
-│   ├── actions/          # Action resolution
-│   ├── llm/              # LLM clients
-│   ├── output/           # Output handlers
-│   └── error.rs          # Error types
-├── docs/
-│   └── architecture.md   # Architecture documentation
-├── examples/
-│   └── example_config.toml
-└── tests/
-```
-
-### Testing
-
-```bash
-# Run tests
-cargo test
-
-# Run with mock provider
-# 1. Edit ~/.rephraser/config.toml, set provider = "mock"
-# 2. Run commands
-cargo run -- rephrase polite "test text"
-```
-
-### Adding Custom Actions
-
-Edit your config file (`~/.rephraser/config.toml`):
+### Define Custom Actions
 
 ```toml
 [[actions]]
@@ -178,27 +120,70 @@ prompt_template = """
 """
 ```
 
-## Next Steps
+### View/Edit Configuration
 
-1. **LLM Integration**
-   - Implement OpenAI API client
-   - Implement Anthropic API client
-   - Add error handling and retries
+```bash
+# Show current config
+rephraser config show
 
-2. **macOS Integration**
-   - Create Automator Quick Actions
-   - Implement actual output methods (clipboard, notification, dialog)
-   - Create installation script
+# Show config file path
+rephraser config path
 
-3. **Polish**
-   - Add comprehensive tests
-   - Performance optimization
-   - User documentation
+# Edit manually
+open ~/.rephraser/config.toml
+```
 
-## Contributing
+## Supported LLM Providers
 
-This is currently in early development. Contributions welcome once the basic implementation is complete.
+- **OpenAI**
+- **Anthropic**
+
+## Output Methods
+
+- **clipboard**: Copy result to clipboard (paste with ⌘+V)
+- **notification**: Show result in macOS Notification Center
+- **dialog**: Display result in modal dialog box
+
+## Development
+
+### Build from Source
+
+```bash
+cargo build --release
+```
+
+### Run Tests
+
+```bash
+cargo test
+```
+
+### Project Structure
+
+```
+rephraser/
+├── src/
+│   ├── main.rs              # CLI entry point
+│   ├── cli/                 # Command handling
+│   ├── config/              # Configuration management
+│   ├── actions/             # Action template resolution
+│   ├── llm/                 # LLM provider implementations
+│   └── output/              # Output method handlers
+├── automator/               # macOS Quick Actions setup
+├── docs/                    # Architecture documentation
+└── examples/                # Configuration examples
+```
+
+See [docs/architecture.md](docs/architecture.md) for detailed architecture documentation.
 
 ## License
 
 MIT
+
+## Acknowledgments
+
+Built with:
+- [clap](https://github.com/clap-rs/clap) - Command-line parsing
+- [serde](https://github.com/serde-rs/serde) - Serialization
+- [reqwest](https://github.com/seanmonstar/reqwest) - HTTP client
+- [tokio](https://github.com/tokio-rs/tokio) - Async runtime
