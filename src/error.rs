@@ -25,6 +25,9 @@ pub enum RephraserError {
     #[error("LLM service error: {0}")]
     LlmServiceError(String),
 
+    #[error("Output error: {0}")]
+    Output(String),
+
     #[error("Network error: {0}")]
     Network(#[from] reqwest::Error),
 

@@ -1,7 +1,7 @@
 //! CLI command implementations
 
 use crate::actions::ActionResolver;
-use crate::config::{ConfigManager, OutputMethod};
+use crate::config::ConfigManager;
 use crate::error::{RephraserError, Result};
 use crate::llm::{AnthropicClient, LlmClient, MockLlmClient, OpenAiClient};
 use crate::output::OutputHandler;
